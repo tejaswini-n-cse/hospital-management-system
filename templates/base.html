@@ -19,6 +19,7 @@
         {% if user.role == 'patient' %}
           <a href="{% url 'my_appointments' %}">My appointments</a>
           <a href="{% url 'invoice_list' %}">Invoices</a>
+          <a href="{% url 'my_records' %}">My records</a>
         {% endif %}
         {% if user.role == 'doctor' %}
           <a href="{% url 'doctor_appointments' %}">My schedule</a>

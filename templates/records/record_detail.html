@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Prescription{% endblock %}
+
+{% block content %}
+  <p class="no-print">
+    {% if user.role == 'patient' %}
+      <a href="{% url 'my_records' %}">&larr; Back to records</a>
+    {% elif user.role == 'doctor' %}
+      <a href="{% url 'patient_history' appointment.patient.pk %}">&larr; Back to patient history</a>
+    {% endif %}
+  </p>
+
+  <div class="card invoice">
+    <div class="invoice-head">
+      <div>
+        <h2>🏥 Hospital Management System</h2>
+        <p class="muted">Prescription</p>
+      </div>
+      <div class="invoice-meta">
+        Date: {{ appointment.date|date:"d M Y" }}<br>
+        Visit time: {{ appointment.time|time:"H:i" }}
+      </div>
+    </div>
+
+    <div class="invoice-parties">
+      <div>
+        <h4>Patient</h4>
+        <p>{{ appointment.patient.get_full_name|default:appointment.patient.username }}</p>
+      </div>
+      <div>
+        <h4>Doctor</h4>
+        <p>Dr. {{ appointment.doctor.user.get_full_name|default:appointment.doctor.user.username }}<br>
+           {{ appointment.doctor.specialization }} | {{ appointment.doctor.department }}</p>
+      </div>
+    </div>
+
+    <h4>Diagnosis</h4>
+    <p><strong>{{ record.diagnosis }}</strong></p>
+
+    {% if record.symptoms %}
+      <h4>Symptoms</h4>
+      <p>{{ record.symptoms|linebreaksbr }}</p>
+    {% endif %}
+
+    <h3>Medicines</h3>
+    {% if record.items.all %}
+      <table>
+        <thead>
+          <tr><th>Medicine</th><th>Dosage</th><th>Frequency</th><th>Days</th><th>Instructions</th></tr>
+        </thead>
+        <tbody>
+          {% for item in record.items.all %}
+            <tr>
+              <td>{{ item.medicine }}</td>
+              <td>{{ item.dosage }}</td>
+              <td>{{ item.frequency }}</td>
+              <td>{{ item.duration_days }}</td>
+              <td>{{ item.instructions|default:"-" }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>No medicines prescribed.</p>
+    {% endif %}
+
+    {% if record.treatment_notes %}
+      <h4>Advice</h4>
+      <p>{{ record.treatment_notes|linebreaksbr }}</p>
+    {% endif %}
+
+    {% if record.follow_up_date %}
+      <p><strong>Follow-up:</strong> {{ record.follow_up_date|date:"d M Y" }}</p>
+    {% endif %}
+
+    <p class="muted">For demonstration only. Not a real medical document.</p>
+  </div>
+
+  <p class="no-print"><button type="button" class="btn btn-outline" onclick="window.print()">Print prescription</button></p>
+{% endblock %}

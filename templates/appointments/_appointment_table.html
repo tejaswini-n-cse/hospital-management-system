@@ -31,6 +31,9 @@
             {% if a.invoice %}
               <a href="{% url 'invoice_detail' a.invoice.pk %}" class="btn btn-small btn-outline">Invoice</a>
             {% endif %}
+            {% if a.record %}
+              <a href="{% url 'record_detail' a.record.pk %}" class="btn btn-small btn-outline">Prescription</a>
+            {% endif %}
           </td>
         </tr>
       {% endfor %}

@@ -83,3 +83,38 @@ class Appointment(models.Model):
     @property
     def doctor_can_cancel(self):
         return self.status in (self.Status.PENDING, self.Status.CONFIRMED) and self.is_upcoming
+
+    @property
+    def can_add_record(self):
+        return self.status == self.Status.COMPLETED
+
+class MedicalRecord(models.Model):
+    appointment = models.OneToOneField(
+        Appointment, on_delete=models.CASCADE, related_name="record"
+    )
+    diagnosis = models.CharField(max_length=255)
+    symptoms = models.TextField(blank=True)
+    treatment_notes = models.TextField(blank=True)
+    follow_up_date = models.DateField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Record for {self.appointment}"
+
+
+class PrescriptionItem(models.Model):
+    record = models.ForeignKey(
+        MedicalRecord, on_delete=models.CASCADE, related_name="items"
+    )
+    medicine = models.CharField(max_length=150)
+    dosage = models.CharField(max_length=100, help_text="e.g. 500 mg")
+    frequency = models.CharField(max_length=100, help_text="e.g. Twice a day after food")
+    duration_days = models.PositiveSmallIntegerField(default=5)
+    instructions = models.CharField(max_length=255, blank=True)
+
+    def __str__(self):
+        return f"{self.medicine} ({self.dosage})"

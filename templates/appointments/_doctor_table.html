@@ -47,6 +47,13 @@
               <button type="submit" class="btn btn-small btn-danger">Cancel</button>
             </form>
           {% endif %}
+
+          {% if a.can_add_record %}
+            <a href="{% url 'edit_record' a.pk %}" class="btn btn-small btn-outline">
+              {% if a.record %}Edit record{% else %}Add record{% endif %}
+            </a>
+          {% endif %}
+          <a href="{% url 'patient_history' a.patient.pk %}" class="btn btn-small btn-outline">Patient history</a>
         </div>
 
         {% if a.status != 'cancelled' %}

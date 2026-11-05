@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}My records{% endblock %}
+
+{% block content %}
+  <h1>My medical records</h1>
+
+  {% if records %}
+    <div class="appt-list">
+      {% for r in records %}
+        <div class="card appt-card">
+          <div class="appt-head">
+            <strong>{{ r.diagnosis }}</strong>
+            <span>{{ r.appointment.date|date:"d M Y" }}</span>
+          </div>
+          <p class="muted">
+            Dr. {{ r.appointment.doctor.user.get_full_name|default:r.appointment.doctor.user.username }}
+            | {{ r.appointment.doctor.specialization }}
+          </p>
+          <p>{{ r.items.all|length }} medicine{{ r.items.all|length|pluralize }}</p>
+          <a href="{% url 'record_detail' r.pk %}" class="btn btn-small">View prescription</a>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>No records yet. A record appears after a doctor completes your visit and adds notes.</p>
+  {% endif %}
+{% endblock %}

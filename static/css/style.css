@@ -197,3 +197,14 @@ th { background: #e3f2fd; }
   body { background: #fff; }
   .invoice { box-shadow: none; padding: 0; }
 }
+
+
+
+/* ---------- Records (Part 8) ---------- */
+.record-form { max-width: 100%; }
+.record-form input[type="text"], .record-form input[type="number"],
+.record-form input[type="date"], .record-form textarea {
+  width: 100%; padding: 8px; border: 1px solid #ccd; border-radius: 6px; font-family: inherit;
+}
+.rx-table td { padding: 6px; }
+.rx-table input[type="checkbox"] { width: auto; }

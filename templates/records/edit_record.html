@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Medical record{% endblock %}
+
+{% block content %}
+  <a href="{% url 'doctor_appointments' %}?tab=history">&larr; Back to schedule</a>
+
+  <h1>Medical record</h1>
+  <p>
+    <strong>{{ appointment.patient.get_full_name|default:appointment.patient.username }}</strong>
+    | {{ appointment.date|date:"d M Y" }}, {{ appointment.time|time:"H:i" }}
+  </p>
+  {% if appointment.reason %}<p class="muted">Reason for visit: {{ appointment.reason }}</p>{% endif %}
+
+  <form method="post" class="form-box record-form">
+    {% csrf_token %}
+
+    {{ form.non_field_errors }}
+    {{ form.as_p }}
+
+    <h3>Prescription</h3>
+    {{ formset.management_form }}
+    {{ formset.non_form_errors }}
+
+    <table class="rx-table">
+      <thead>
+        <tr><th>Medicine</th><th>Dosage</th><th>Frequency</th><th>Days</th><th>Instructions</th><th>Delete</th></tr>
+      </thead>
+      <tbody>
+        {% for f in formset %}
+          <tr>
+            <td>{{ f.id }}{{ f.medicine }}{{ f.medicine.errors }}</td>
+            <td>{{ f.dosage }}{{ f.dosage.errors }}</td>
+            <td>{{ f.frequency }}{{ f.frequency.errors }}</td>
+            <td>{{ f.duration_days }}{{ f.duration_days.errors }}</td>
+            <td>{{ f.instructions }}</td>
+            <td>{% if f.instance.pk %}{{ f.DELETE }}{% endif %}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <p class="muted">Leave unused rows empty.</p>
+
+    <button type="submit" class="btn">Save record</button>
+  </form>
+{% endblock %}

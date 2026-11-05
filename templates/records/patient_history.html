@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Patient history{% endblock %}
+
+{% block content %}
+  <a href="{% url 'doctor_appointments' %}">&larr; Back to schedule</a>
+  <h1>History: {{ patient.get_full_name|default:patient.username }}</h1>
+
+  {% if records %}
+    <div class="appt-list">
+      {% for r in records %}
+        <div class="card appt-card">
+          <div class="appt-head">
+            <strong>{{ r.diagnosis }}</strong>
+            <span>{{ r.appointment.date|date:"d M Y" }}</span>
+          </div>
+          <p class="muted">Dr. {{ r.appointment.doctor.user.get_full_name|default:r.appointment.doctor.user.username }}</p>
+          <p>{{ r.items.all|length }} medicine{{ r.items.all|length|pluralize }}</p>
+          <a href="{% url 'record_detail' r.pk %}" class="btn btn-small">View</a>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>No medical records for this patient yet.</p>
+  {% endif %}
+{% endblock %}

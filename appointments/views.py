@@ -10,9 +10,15 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
+
 from accounts.models import Department, DoctorProfile, User
 from accounts.views import role_required
 from datetime import datetime
+
+from .forms import BookingForm, MedicalRecordForm, PrescriptionFormSet
+from .models import Appointment, MedicalRecord
 
 from .forms import BookingForm
 from .models import Appointment
@@ -136,7 +142,7 @@ def my_appointments(request):
 
     appointments = list(
         Appointment.objects.filter(patient=request.user)
-        .select_related("doctor__user", "doctor__department", "invoice")
+        .select_related("doctor__user", "doctor__department", "invoice", "record")
     )
 
     upcoming = sorted(
@@ -195,7 +201,7 @@ def doctor_appointments(request):
     now = timezone.now()
 
     appointments = list(
-        profile.appointments.select_related("patient", "patient__patient_profile")
+        profile.appointments.select_related("patient", "record")
     )
 
     active = (Appointment.Status.PENDING, Appointment.Status.CONFIRMED)
@@ -264,3 +270,97 @@ def save_doctor_notes(request, pk):
     appointment.save(update_fields=["doctor_notes"])
     messages.success(request, "Notes saved.")
     return redirect(request.POST.get("next") or "doctor_appointments")
+
+
+@role_required(User.Role.DOCTOR)
+def edit_record(request, pk):
+    profile = _doctor_profile_or_404(request.user)
+    # only this doctor's own completed appointments
+    appointment = get_object_or_404(
+        Appointment.objects.select_related("patient"), pk=pk, doctor=profile
+    )
+    if not appointment.can_add_record:
+        messages.error(request, "A record can only be added after the visit is completed.")
+        return redirect("doctor_appointments")
+
+    record = MedicalRecord.objects.filter(appointment=appointment).first()
+
+    if request.method == "POST":
+        form = MedicalRecordForm(request.POST, instance=record)
+        formset = PrescriptionFormSet(request.POST, instance=record or MedicalRecord())
+        if form.is_valid() and formset.is_valid():
+            with transaction.atomic():
+                saved = form.save(commit=False)
+                saved.appointment = appointment
+                saved.save()
+                formset.instance = saved
+                formset.save()
+            messages.success(request, "Medical record saved.")
+            return redirect("doctor_appointments")
+    else:
+        form = MedicalRecordForm(instance=record)
+        formset = PrescriptionFormSet(instance=record or MedicalRecord())
+
+    return render(request, "records/edit_record.html", {
+        "appointment": appointment,
+        "form": form,
+        "formset": formset,
+    })
+
+
+@role_required(User.Role.PATIENT)
+def my_records(request):
+    records = (
+        MedicalRecord.objects.filter(appointment__patient=request.user)
+        .select_related("appointment__doctor__user")
+        .prefetch_related("items")
+        .order_by("-appointment__date")
+    )
+    return render(request, "records/my_records.html", {"records": records})
+
+
+@login_required
+def record_detail(request, pk):
+    record = get_object_or_404(
+        MedicalRecord.objects.select_related(
+            "appointment__patient",
+            "appointment__doctor__user",
+            "appointment__doctor__department",
+        ).prefetch_related("items"),
+        pk=pk,
+    )
+    appointment = record.appointment
+    user = request.user
+
+    # only the patient, the treating doctor, or an admin
+    if not (
+        user.is_superuser
+        or user == appointment.patient
+        or user == appointment.doctor.user
+    ):
+        raise PermissionDenied
+
+    return render(request, "records/record_detail.html", {
+        "record": record,
+        "appointment": appointment,
+    })
+
+
+@role_required(User.Role.DOCTOR)
+def patient_history(request, patient_id):
+    profile = _doctor_profile_or_404(request.user)
+    # a doctor may only see patients they have an appointment with
+    if not Appointment.objects.filter(doctor=profile, patient_id=patient_id).exists():
+        raise PermissionDenied
+
+    patient = get_object_or_404(User, pk=patient_id)
+    records = (
+        MedicalRecord.objects.filter(appointment__patient=patient)
+        .select_related("appointment__doctor__user")
+        .prefetch_related("items")
+        .order_by("-appointment__date")
+    )
+    return render(request, "records/patient_history.html", {
+        "patient": patient,
+        "records": records,
+    })
