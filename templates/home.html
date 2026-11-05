@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="hero">
+    <h1>Book your doctor appointment online</h1>
+    <p>{{ doctor_count }} doctor{{ doctor_count|pluralize }} available across {{ departments|length }} department{{ departments|length|pluralize }}.</p>
+    {% if not user.is_authenticated %}
+      <a href="{% url 'register' %}" class="btn">Create an account</a>
+      <a href="{% url 'login' %}" class="btn btn-outline">Login</a>
+    {% else %}
+      <a href="{% url 'dashboard' %}" class="btn">Go to my dashboard</a>
+    {% endif %}
+  </section>
+
+  <h2>Our Departments</h2>
+  <div class="cards">
+    {% for dept in departments %}
+      <div class="card">
+        <h3>{{ dept.name }}</h3>
+        <p>{{ dept.description|default:"Expert care from our specialists." }}</p>
+      </div>
+    {% empty %}
+      <p>No departments yet. Add some in the admin panel.</p>
+    {% endfor %}
+  </div>
+{% endblock %}

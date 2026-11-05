@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Patient Dashboard{% endblock %}
+
+{% block content %}
+  <h1>Welcome, {{ user.get_full_name|default:user.username }}</h1>
+  <p>Role: Patient</p>
+
+  <h2>My recent appointments</h2>
+  {% if appointments %}
+    <table>
+      <thead>
+        <tr><th>Doctor</th><th>Date</th><th>Time</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        {% for a in appointments %}
+          <tr>
+            <td>{{ a.doctor }}</td>
+            <td>{{ a.date }}</td>
+            <td>{{ a.time|time:"H:i" }}</td>
+            <td>{{ a.get_status_display }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>You have no appointments yet. Booking comes in Part 4.</p>
+  {% endif %}
+{% endblock %}

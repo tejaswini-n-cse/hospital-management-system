@@ -1,0 +1,85 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: #f4f7fb;
+  color: #223;
+  line-height: 1.6;
+}
+
+a { color: #1565c0; text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.navbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 28px;
+  background: #0d47a1;
+}
+.navbar a, .navbar .hello { color: #fff; }
+.navbar .brand { font-size: 1.2rem; font-weight: 700; }
+.navbar nav { display: flex; flex-wrap: wrap; align-items: center; gap: 18px; }
+
+.inline-form { display: inline; }
+.link-button {
+  background: none; border: none; color: #fff;
+  font: inherit; cursor: pointer;
+}
+.link-button:hover { text-decoration: underline; }
+
+.container { max-width: 960px; margin: 28px auto; padding: 0 16px; min-height: 60vh; }
+
+.hero {
+  text-align: center;
+  padding: 48px 16px;
+  margin-bottom: 32px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.08);
+}
+.hero h1 { margin-bottom: 8px; }
+.hero p { margin-bottom: 20px; color: #556; }
+
+.btn {
+  display: inline-block;
+  padding: 10px 22px;
+  background: #1565c0;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+.btn:hover { background: #0d47a1; text-decoration: none; }
+.btn-outline { background: #fff; color: #1565c0; border: 2px solid #1565c0; }
+.btn-outline:hover { background: #e3f2fd; }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin-top: 12px; }
+.card { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+
+.form-box {
+  max-width: 460px; margin: 0 auto; padding: 28px;
+  background: #fff; border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.08);
+}
+.form-box h2 { margin-bottom: 16px; }
+.form-box p { margin-bottom: 12px; }
+.form-box input, .form-box select {
+  width: 100%; padding: 9px; border: 1px solid #ccd; border-radius: 6px;
+}
+.form-box .helptext { display: block; font-size: .8rem; color: #667; }
+.errorlist { color: #c62828; list-style: none; font-size: .9rem; }
+
+.message { padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; background: #e3f2fd; }
+.message.success { background: #e8f5e9; }
+.message.error { background: #ffebee; }
+.message.warning { background: #fff8e1; }
+
+table { width: 100%; border-collapse: collapse; background: #fff; margin: 12px 0; }
+th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #e3e8ef; }
+th { background: #e3f2fd; }
+
+.footer { text-align: center; padding: 18px; color: #667; }
