@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Dr. {{ doctor.user.get_full_name }}{% endblock %}
+
+{% block content %}
+  <a href="{% url 'doctor_list' %}">&larr; Back to doctors</a>
+
+  <div class="detail-header">
+    {% if doctor.photo %}
+      <img src="{{ doctor.photo.url }}" alt="Dr. {{ doctor.user.get_full_name }}" class="avatar large">
+    {% else %}
+      <div class="avatar large placeholder">👨‍⚕️</div>
+    {% endif %}
+    <div>
+      <h1>Dr. {{ doctor.user.get_full_name|default:doctor.user.username }}</h1>
+      <p>{{ doctor.specialization }} | {{ doctor.department }}</p>
+      <p>{{ doctor.experience_years }} years of experience</p>
+      <p><strong>Consultation fee: ₹{{ doctor.consultation_fee }}</strong></p>
+    </div>
+  </div>
+
+  {% if doctor.bio %}
+    <h2>About</h2>
+    <p>{{ doctor.bio }}</p>
+  {% endif %}
+
+  <h2>Weekly availability</h2>
+  {% if availabilities %}
+    <table>
+      <thead>
+        <tr><th>Day</th><th>From</th><th>To</th><th>Slot length</th></tr>
+      </thead>
+      <tbody>
+        {% for a in availabilities %}
+          <tr>
+            <td>{{ a.get_day_of_week_display }}</td>
+            <td>{{ a.start_time|time:"H:i" }}</td>
+            <td>{{ a.end_time|time:"H:i" }}</td>
+            <td>{{ a.slot_minutes }} min</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>This doctor has not set availability yet.</p>
+  {% endif %}
+
+  <p>
+  {% if user.is_authenticated %}
+    {% if user.role == 'patient' %}
+      <a href="{% url 'book_appointment' doctor.pk %}" class="btn">Book appointment</a>
+    {% else %}
+      <span class="muted">Only patient accounts can book appointments.</span>
+    {% endif %}
+  {% else %}
+    <a href="{% url 'login' %}?next={{ request.path }}" class="btn">Login to book</a>
+  {% endif %}
+</p>
+{% endblock %}

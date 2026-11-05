@@ -10,6 +10,7 @@
     {% else %}
       <a href="{% url 'dashboard' %}" class="btn">Go to my dashboard</a>
     {% endif %}
+    <a href="{% url 'doctor_list' %}" class="btn btn-outline">Find a doctor</a>
   </section>
 
   <h2>Our Departments</h2>
@@ -17,7 +18,7 @@
     {% for dept in departments %}
       <div class="card">
         <h3>{{ dept.name }}</h3>
-        <p>{{ dept.description|default:"Expert care from our specialists." }}</p>
+        <p>{{ dept.description|default:"Expert care from our specialists."|truncatewords:12 }}</p>
       </div>
     {% empty %}
       <p>No departments yet. Add some in the admin panel.</p>

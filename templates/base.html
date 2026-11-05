@@ -13,6 +13,7 @@
     <a href="{% url 'home' %}" class="brand">🏥 Hospital Management</a>
     <nav>
       <a href="{% url 'home' %}">Home</a>
+      <a href="{% url 'doctor_list' %}">Doctors</a>
       {% if user.is_authenticated %}
         <a href="{% url 'dashboard' %}">Dashboard</a>
         <span class="hello">Hi, {{ user.first_name|default:user.username }}</span>

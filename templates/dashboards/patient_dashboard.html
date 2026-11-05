@@ -24,6 +24,6 @@
       </tbody>
     </table>
   {% else %}
-    <p>You have no appointments yet. Booking comes in Part 4.</p>
+   <p>You have no appointments yet. <a href="{% url 'doctor_list' %}">Find a doctor and book one</a>.</p>
   {% endif %}
 {% endblock %}

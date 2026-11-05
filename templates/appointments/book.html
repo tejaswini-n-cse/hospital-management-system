@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Book appointment{% endblock %}
+
+{% block content %}
+  <a href="{% url 'doctor_detail' doctor.pk %}">&larr; Back to doctor</a>
+
+  <div class="form-box booking-box">
+    <h2>Book appointment</h2>
+    <p>
+      <strong>Dr. {{ doctor.user.get_full_name|default:doctor.user.username }}</strong><br>
+      {{ doctor.specialization }} | {{ doctor.department }}<br>
+      Fee: ₹{{ doctor.consultation_fee }}
+    </p>
+
+    <form method="post" id="booking-form" data-slots-url="{% url 'available_slots' doctor.pk %}">
+      {% csrf_token %}
+
+      {{ form.non_field_errors }}
+
+      <p>
+        <label for="id_date">Date</label>
+        <input type="date" id="id_date" name="date"
+               min="{{ today|date:'Y-m-d' }}" max="{{ max_date|date:'Y-m-d' }}"
+               value="{{ form.date.value|default:'' }}" required>
+        {{ form.date.errors }}
+      </p>
+
+      <p id="slot-message" class="muted">Pick a date to see free slots.</p>
+      <div id="slots" class="slots"></div>
+
+      <input type="hidden" name="time" id="selected-time" value="{{ form.time.value|default:'' }}">
+      {{ form.time.errors }}
+
+      <p>
+        <label for="id_reason">Reason for visit</label>
+        {{ form.reason }}
+        {{ form.reason.errors }}
+      </p>
+
+      <button type="submit" class="btn" id="book-btn" disabled>Confirm booking</button>
+    </form>
+  </div>
+
+  <script src="{% static 'js/booking.js' %}"></script>
+{% endblock %}

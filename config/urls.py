@@ -10,6 +10,7 @@ admin.site.index_title = "Administration"
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("accounts.urls")),
+    path("", include("appointments.urls")),
 ]
 
 if settings.DEBUG:
