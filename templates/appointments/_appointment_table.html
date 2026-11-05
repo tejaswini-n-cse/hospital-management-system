@@ -28,6 +28,9 @@
             {% elif not a.can_cancel %}
               <span class="muted">-</span>
             {% endif %}
+            {% if a.invoice %}
+              <a href="{% url 'invoice_detail' a.invoice.pk %}" class="btn btn-small btn-outline">Invoice</a>
+            {% endif %}
           </td>
         </tr>
       {% endfor %}

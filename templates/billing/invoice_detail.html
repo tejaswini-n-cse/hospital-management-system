@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Invoice {{ invoice.invoice_number }}{% endblock %}
+
+{% block content %}
+  <p class="no-print">
+    {% if user.role == 'doctor' %}
+      <a href="{% url 'doctor_invoices' %}">&larr; Back to earnings</a>
+    {% elif user.role == 'patient' %}
+      <a href="{% url 'invoice_list' %}">&larr; Back to invoices</a>
+    {% endif %}
+  </p>
+
+  <div class="card invoice">
+    <div class="invoice-head">
+      <div>
+        <h2>🏥 Hospital Management System</h2>
+        <p class="muted">Tax invoice</p>
+      </div>
+      <div class="invoice-meta">
+        <strong>{{ invoice.invoice_number }}</strong><br>
+        Issued: {{ invoice.issued_at|date:"d M Y" }}<br>
+        <span class="badge badge-{{ invoice.status }}">{{ invoice.get_status_display }}</span>
+      </div>
+    </div>
+
+    <div class="invoice-parties">
+      <div>
+        <h4>Patient</h4>
+        <p>{{ appointment.patient.get_full_name|default:appointment.patient.username }}<br>
+           {{ appointment.patient.email }}</p>
+      </div>
+      <div>
+        <h4>Doctor</h4>
+        <p>Dr. {{ appointment.doctor.user.get_full_name|default:appointment.doctor.user.username }}<br>
+           {{ appointment.doctor.specialization }} | {{ appointment.doctor.department }}</p>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr><th>Description</th><th>Visit</th><th class="num">Amount</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Consultation fee</td>
+          <td>{{ appointment.date|date:"d M Y" }}, {{ appointment.time|time:"H:i" }}</td>
+          <td class="num">₹{{ invoice.consultation_fee }}</td>
+        </tr>
+        <tr>
+          <td>Tax ({{ invoice.tax_percent }}%)</td>
+          <td></td>
+          <td class="num">₹{{ invoice.tax_amount }}</td>
+        </tr>
+        <tr class="total-row">
+          <td colspan="2"><strong>Total</strong></td>
+          <td class="num"><strong>₹{{ invoice.total }}</strong></td>
+        </tr>
+      </tbody>
+    </table>
+
+    {% if invoice.status == 'paid' %}
+      <p>Paid on {{ invoice.paid_at|date:"d M Y, H:i" }} by {{ invoice.get_payment_method_display }}.</p>
+    {% endif %}
+  </div>
+
+  <div class="no-print">
+    {% if invoice.status == 'unpaid' and user == appointment.patient %}
+      <form method="post" action="{% url 'pay_invoice' invoice.pk %}" class="pay-form">
+        {% csrf_token %}
+        <select name="method" required>
+          <option value="">Payment method</option>
+          {% for value, label in methods %}
+            <option value="{{ value }}">{{ label }}</option>
+          {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-success">Pay now (demo)</button>
+      </form>
+      <p class="muted">Demo payment: no real money is processed.</p>
+    {% endif %}
+
+    <p><button type="button" class="btn btn-outline" onclick="window.print()">Print invoice</button></p>
+  </div>
+{% endblock %}

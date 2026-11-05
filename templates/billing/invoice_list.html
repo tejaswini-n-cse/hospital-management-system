@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}My invoices{% endblock %}
+
+{% block content %}
+  <h1>My invoices</h1>
+  <p>Outstanding amount: <strong>₹{{ outstanding }}</strong></p>
+
+  {% if invoices %}
+    <table>
+      <thead>
+        <tr><th>Invoice</th><th>Doctor</th><th>Visit date</th><th>Total</th><th>Status</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for inv in invoices %}
+          <tr>
+            <td>{{ inv.invoice_number }}</td>
+            <td>Dr. {{ inv.appointment.doctor.user.get_full_name|default:inv.appointment.doctor.user.username }}</td>
+            <td>{{ inv.appointment.date|date:"d M Y" }}</td>
+            <td>₹{{ inv.total }}</td>
+            <td><span class="badge badge-{{ inv.status }}">{{ inv.get_status_display }}</span></td>
+            <td><a href="{% url 'invoice_detail' inv.pk %}">View</a></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No invoices yet. An invoice appears after a doctor completes your visit.</p>
+  {% endif %}
+{% endblock %}

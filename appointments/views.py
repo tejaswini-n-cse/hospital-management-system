@@ -1,3 +1,4 @@
+from billing.services import create_invoice_for
 from datetime import date, timedelta
 
 from django.contrib import messages
@@ -135,7 +136,7 @@ def my_appointments(request):
 
     appointments = list(
         Appointment.objects.filter(patient=request.user)
-        .select_related("doctor__user", "doctor__department")
+        .select_related("doctor__user", "doctor__department", "invoice")
     )
 
     upcoming = sorted(
@@ -231,22 +232,26 @@ def update_appointment_status(request, pk):
     # only this doctor's own appointments can be changed
     appointment = get_object_or_404(Appointment, pk=pk, doctor=profile)
     action = request.POST.get("action")
+    redirect_to = request.POST.get("next") or "doctor_appointments"
 
     if action == "confirm" and appointment.can_confirm:
-        appointment.status = Appointment.Status.CONFIRMED
-        messages.success(request, "Appointment confirmed.")
+        new_status, text = Appointment.Status.CONFIRMED, "Appointment confirmed."
     elif action == "complete" and appointment.can_complete:
-        appointment.status = Appointment.Status.COMPLETED
-        messages.success(request, "Appointment marked as completed.")
+        new_status, text = Appointment.Status.COMPLETED, "Appointment completed. Invoice created."
     elif action == "cancel" and appointment.doctor_can_cancel:
-        appointment.status = Appointment.Status.CANCELLED
-        messages.success(request, "Appointment cancelled. The slot is free again.")
+        new_status, text = Appointment.Status.CANCELLED, "Appointment cancelled. The slot is free again."
     else:
         messages.error(request, "That action is not allowed for this appointment.")
-        return redirect(request.POST.get("next") or "doctor_appointments")
+        return redirect(redirect_to)
 
-    appointment.save(update_fields=["status"])
-    return redirect(request.POST.get("next") or "doctor_appointments")
+    with transaction.atomic():
+        appointment.status = new_status
+        appointment.save(update_fields=["status"])
+        if new_status == Appointment.Status.COMPLETED:
+            create_invoice_for(appointment)
+
+    messages.success(request, text)
+    return redirect(redirect_to)
 
 
 @require_POST

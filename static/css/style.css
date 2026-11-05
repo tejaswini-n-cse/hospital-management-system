@@ -175,3 +175,25 @@ th { background: #e3f2fd; }
 }
 .btn-success { background: #2e7d32; }
 .btn-success:hover { background: #1b5e20; }
+
+
+/* ---------- Billing (Part 7) ---------- */
+.badge-paid { background: #d4edda; color: #155724; }
+.badge-unpaid { background: #fff3cd; color: #8a6d00; }
+
+.invoice { padding: 28px; margin-bottom: 20px; }
+.invoice-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+.invoice-meta { text-align: right; }
+.invoice-parties { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 16px; }
+.invoice-parties h4 { color: #667; font-size: .85rem; text-transform: uppercase; margin-bottom: 4px; }
+.num { text-align: right; }
+.total-row td { background: #f4f7fb; font-size: 1.05rem; }
+
+.pay-form { display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0 4px; }
+.pay-form select { padding: 9px; border: 1px solid #ccd; border-radius: 6px; font-size: 1rem; }
+
+@media print {
+  .navbar, .footer, .no-print, .message { display: none !important; }
+  body { background: #fff; }
+  .invoice { box-shadow: none; padding: 0; }
+}

@@ -18,9 +18,11 @@
         <a href="{% url 'dashboard' %}">Dashboard</a>
         {% if user.role == 'patient' %}
           <a href="{% url 'my_appointments' %}">My appointments</a>
+          <a href="{% url 'invoice_list' %}">Invoices</a>
         {% endif %}
         {% if user.role == 'doctor' %}
           <a href="{% url 'doctor_appointments' %}">My schedule</a>
+          <a href="{% url 'doctor_invoices' %}">Earnings</a>
         {% endif %}
         <span class="hello">Hi, {{ user.first_name|default:user.username }}</span>
         <form method="post" action="{% url 'logout' %}" class="inline-form">
