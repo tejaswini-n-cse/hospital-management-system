@@ -11,6 +11,7 @@ from django.views.decorators.http import require_POST
 
 from accounts.models import Department, DoctorProfile, User
 from accounts.views import role_required
+from datetime import datetime
 
 from .forms import BookingForm
 from .models import Appointment
@@ -173,3 +174,88 @@ def cancel_appointment(request, pk):
             f"{Appointment.CANCEL_BEFORE_HOURS} hours before the visit.",
         )
     return redirect("my_appointments")
+
+def _doctor_profile_or_404(user):
+    return get_object_or_404(DoctorProfile, user=user)
+
+
+@role_required(User.Role.DOCTOR)
+def doctor_appointments(request):
+    profile = DoctorProfile.objects.filter(user=request.user).first()
+    if not profile:
+        messages.warning(request, "Your doctor profile is not set up yet. Ask the admin.")
+        return redirect("doctor_dashboard")
+
+    tab = request.GET.get("tab", "today")
+    if tab not in ("today", "upcoming", "history"):
+        tab = "today"
+
+    today = timezone.localdate()
+    now = timezone.now()
+
+    appointments = list(
+        profile.appointments.select_related("patient", "patient__patient_profile")
+    )
+
+    active = (Appointment.Status.PENDING, Appointment.Status.CONFIRMED)
+
+    today_list = sorted(
+        [a for a in appointments if a.date == today and a.status != Appointment.Status.CANCELLED],
+        key=lambda a: a.starts_at,
+    )
+    upcoming_list = sorted(
+        [a for a in appointments if a.date > today and a.status in active],
+        key=lambda a: a.starts_at,
+    )
+    history_list = sorted(
+        [a for a in appointments
+         if a.status in (Appointment.Status.COMPLETED, Appointment.Status.CANCELLED)
+         or (a.date < today and a.status in active)],
+        key=lambda a: a.starts_at,
+        reverse=True,
+    )
+
+    return render(request, "appointments/doctor_appointments.html", {
+        "profile": profile,
+        "tab": tab,
+        "today_list": today_list,
+        "upcoming_list": upcoming_list,
+        "history_list": history_list,
+    })
+
+
+@require_POST
+@role_required(User.Role.DOCTOR)
+def update_appointment_status(request, pk):
+    profile = _doctor_profile_or_404(request.user)
+    # only this doctor's own appointments can be changed
+    appointment = get_object_or_404(Appointment, pk=pk, doctor=profile)
+    action = request.POST.get("action")
+
+    if action == "confirm" and appointment.can_confirm:
+        appointment.status = Appointment.Status.CONFIRMED
+        messages.success(request, "Appointment confirmed.")
+    elif action == "complete" and appointment.can_complete:
+        appointment.status = Appointment.Status.COMPLETED
+        messages.success(request, "Appointment marked as completed.")
+    elif action == "cancel" and appointment.doctor_can_cancel:
+        appointment.status = Appointment.Status.CANCELLED
+        messages.success(request, "Appointment cancelled. The slot is free again.")
+    else:
+        messages.error(request, "That action is not allowed for this appointment.")
+        return redirect(request.POST.get("next") or "doctor_appointments")
+
+    appointment.save(update_fields=["status"])
+    return redirect(request.POST.get("next") or "doctor_appointments")
+
+
+@require_POST
+@role_required(User.Role.DOCTOR)
+def save_doctor_notes(request, pk):
+    profile = _doctor_profile_or_404(request.user)
+    appointment = get_object_or_404(Appointment, pk=pk, doctor=profile)
+
+    appointment.doctor_notes = request.POST.get("doctor_notes", "").strip()[:2000]
+    appointment.save(update_fields=["doctor_notes"])
+    messages.success(request, "Notes saved.")
+    return redirect(request.POST.get("next") or "doctor_appointments")

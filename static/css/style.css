@@ -161,3 +161,17 @@ th { background: #e3f2fd; }
 .btn-danger { background: #c62828; }
 .btn-danger:hover { background: #8e0000; }
 .btn-small { padding: 5px 12px; font-size: .85rem; }
+
+/* ---------- Doctor schedule (Part 6) ---------- */
+.appt-list { display: grid; gap: 14px; }
+.appt-card { padding: 18px; }
+.appt-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+.appt-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+.notes-form { margin-top: 10px; }
+.notes-form label { display: block; font-size: .85rem; font-weight: 600; margin-bottom: 4px; }
+.notes-form textarea {
+  width: 100%; padding: 8px; border: 1px solid #ccd; border-radius: 6px;
+  font-family: inherit; margin-bottom: 8px;
+}
+.btn-success { background: #2e7d32; }
+.btn-success:hover { background: #1b5e20; }

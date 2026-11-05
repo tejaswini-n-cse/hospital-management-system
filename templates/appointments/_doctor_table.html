@@ -1,0 +1,66 @@
+{% if items %}
+  <div class="appt-list">
+    {% for a in items %}
+      <div class="card appt-card">
+        <div class="appt-head">
+          <div>
+            <strong>{{ a.patient.get_full_name|default:a.patient.username }}</strong>
+            <span class="muted">
+              {% if a.patient.phone %}| {{ a.patient.phone }}{% endif %}
+            </span>
+          </div>
+          <div>
+            {{ a.date|date:"d M Y" }} at {{ a.time|time:"H:i" }}
+            <span class="badge badge-{{ a.status }}">{{ a.get_status_display }}</span>
+          </div>
+        </div>
+
+        {% if a.reason %}
+          <p><strong>Reason:</strong> {{ a.reason }}</p>
+        {% endif %}
+
+        <div class="appt-actions">
+          {% if a.can_confirm %}
+            <form method="post" action="{% url 'update_appointment_status' a.pk %}">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="confirm">
+              <input type="hidden" name="next" value="{% url 'doctor_appointments' %}">
+              <button type="submit" class="btn btn-small">Confirm</button>
+            </form>
+          {% endif %}
+
+          {% if a.can_complete %}
+            <form method="post" action="{% url 'update_appointment_status' a.pk %}">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="complete">
+              <input type="hidden" name="next" value="{% url 'doctor_appointments' %}">
+              <button type="submit" class="btn btn-small btn-success">Mark completed</button>
+            </form>
+          {% endif %}
+
+          {% if a.doctor_can_cancel %}
+            <form method="post" action="{% url 'update_appointment_status' a.pk %}"
+                  onsubmit="return confirm('Cancel this appointment?');">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="cancel">
+              <input type="hidden" name="next" value="{% url 'doctor_appointments' %}">
+              <button type="submit" class="btn btn-small btn-danger">Cancel</button>
+            </form>
+          {% endif %}
+        </div>
+
+        {% if a.status != 'cancelled' %}
+          <form method="post" action="{% url 'save_doctor_notes' a.pk %}" class="notes-form">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{% url 'doctor_appointments' %}">
+            <label for="notes-{{ a.pk }}">Notes for the patient</label>
+            <textarea id="notes-{{ a.pk }}" name="doctor_notes" rows="2" maxlength="2000">{{ a.doctor_notes }}</textarea>
+            <button type="submit" class="btn btn-small btn-outline">Save notes</button>
+          </form>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <p>{{ empty_text }}</p>
+{% endif %}

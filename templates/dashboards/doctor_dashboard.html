@@ -22,10 +22,10 @@
         <tbody>
           {% for a in appointments %}
             <tr>
-              <td>{{ a.patient }}</td>
-              <td>{{ a.date }}</td>
+              <td>{{ a.patient.get_full_name|default:a.patient.username }}</td>
+              <td>{{ a.date|date:"d M Y" }}</td>
               <td>{{ a.time|time:"H:i" }}</td>
-              <td>{{ a.get_status_display }}</td>
+              <td><span class="badge badge-{{ a.status }}">{{ a.get_status_display }}</span></td>
             </tr>
           {% endfor %}
         </tbody>
@@ -33,5 +33,7 @@
     {% else %}
       <p>No appointments yet.</p>
     {% endif %}
+
+    <p><a href="{% url 'doctor_appointments' %}" class="btn">Manage my schedule</a></p>
   {% endif %}
 {% endblock %}

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}My schedule{% endblock %}
+
+{% block content %}
+  <h1>My schedule</h1>
+  <p class="muted">Dr. {{ user.get_full_name|default:user.username }} | {{ profile.specialization }}</p>
+
+  <div class="tabs">
+    <a href="?tab=today" class="tab {% if tab == 'today' %}active{% endif %}">Today ({{ today_list|length }})</a>
+    <a href="?tab=upcoming" class="tab {% if tab == 'upcoming' %}active{% endif %}">Upcoming ({{ upcoming_list|length }})</a>
+    <a href="?tab=history" class="tab {% if tab == 'history' %}active{% endif %}">History ({{ history_list|length }})</a>
+  </div>
+
+  {% if tab == 'today' %}
+    {% include "appointments/_doctor_table.html" with items=today_list empty_text="No appointments today." %}
+  {% elif tab == 'upcoming' %}
+    {% include "appointments/_doctor_table.html" with items=upcoming_list empty_text="No upcoming appointments." %}
+  {% else %}
+    {% include "appointments/_doctor_table.html" with items=history_list empty_text="No past appointments." %}
+  {% endif %}
+{% endblock %}

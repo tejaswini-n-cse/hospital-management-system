@@ -70,3 +70,16 @@ class Appointment(models.Model):
             return False
         limit = self.starts_at - timedelta(hours=self.CANCEL_BEFORE_HOURS)
         return timezone.now() < limit
+
+    @property
+    def can_confirm(self):
+        return self.status == self.Status.PENDING and self.is_upcoming
+
+    @property
+    def can_complete(self):
+        # a visit can be completed once it has started
+        return self.status in (self.Status.PENDING, self.Status.CONFIRMED) and not self.is_upcoming
+
+    @property
+    def doctor_can_cancel(self):
+        return self.status in (self.Status.PENDING, self.Status.CONFIRMED) and self.is_upcoming

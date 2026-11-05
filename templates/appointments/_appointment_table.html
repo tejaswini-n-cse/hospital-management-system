@@ -22,9 +22,10 @@
                 {% csrf_token %}
                 <button type="submit" class="btn btn-danger btn-small">Cancel</button>
               </form>
-            {% elif a.doctor_notes %}
-              <span class="muted">Note: {{ a.doctor_notes }}</span>
-            {% else %}
+            {% endif %}
+            {% if a.doctor_notes %}
+              <div class="muted">Doctor's note: {{ a.doctor_notes }}</div>
+            {% elif not a.can_cancel %}
               <span class="muted">-</span>
             {% endif %}
           </td>
