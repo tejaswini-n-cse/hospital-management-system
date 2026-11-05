@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}My appointments{% endblock %}
+
+{% block content %}
+  <h1>My appointments</h1>
+
+  <div class="tabs">
+    <a href="?tab=upcoming" class="tab {% if tab == 'upcoming' %}active{% endif %}">
+      Upcoming ({{ upcoming|length }})
+    </a>
+    <a href="?tab=past" class="tab {% if tab == 'past' %}active{% endif %}">
+      Past &amp; cancelled ({{ past|length }})
+    </a>
+  </div>
+
+  {% if tab == 'upcoming' %}
+    {% include "appointments/_appointment_table.html" with items=upcoming empty_text="No upcoming appointments." %}
+  {% else %}
+    {% include "appointments/_appointment_table.html" with items=past empty_text="No past appointments." %}
+  {% endif %}
+
+  <p><a href="{% url 'doctor_list' %}" class="btn">Book a new appointment</a></p>
+{% endblock %}

@@ -1,5 +1,8 @@
+from datetime import datetime, timedelta
+
 from django.conf import settings
 from django.db import models
+from django.utils import timezone
 
 from accounts.models import DoctorProfile
 
@@ -35,6 +38,8 @@ class Appointment(models.Model):
         COMPLETED = "completed", "Completed"
         CANCELLED = "cancelled", "Cancelled"
 
+    CANCEL_BEFORE_HOURS = 2
+
     patient = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="appointments")
     doctor = models.ForeignKey(DoctorProfile, on_delete=models.CASCADE, related_name="appointments")
     date = models.DateField()
@@ -50,3 +55,18 @@ class Appointment(models.Model):
 
     def __str__(self):
         return f"{self.patient} with {self.doctor} on {self.date} at {self.time:%H:%M}"
+
+    @property
+    def starts_at(self):
+        return timezone.make_aware(datetime.combine(self.date, self.time))
+
+    @property
+    def is_upcoming(self):
+        return self.starts_at >= timezone.now()
+
+    @property
+    def can_cancel(self):
+        if self.status not in (self.Status.PENDING, self.Status.CONFIRMED):
+            return False
+        limit = self.starts_at - timedelta(hours=self.CANCEL_BEFORE_HOURS)
+        return timezone.now() < limit

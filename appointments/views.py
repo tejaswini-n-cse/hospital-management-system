@@ -7,6 +7,7 @@ from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.views.decorators.http import require_POST
 
 from accounts.models import Department, DoctorProfile, User
 from accounts.views import role_required
@@ -124,3 +125,51 @@ def book_appointment(request, pk):
         "today": today,
         "max_date": today + timedelta(days=MAX_DAYS_AHEAD),
     })
+
+
+@role_required(User.Role.PATIENT)
+def my_appointments(request):
+    tab = request.GET.get("tab", "upcoming")
+    now = timezone.now()
+
+    appointments = list(
+        Appointment.objects.filter(patient=request.user)
+        .select_related("doctor__user", "doctor__department")
+    )
+
+    upcoming = sorted(
+        [a for a in appointments
+         if a.status != Appointment.Status.CANCELLED and a.starts_at >= now],
+        key=lambda a: a.starts_at,
+    )
+    past = sorted(
+        [a for a in appointments
+         if a.status == Appointment.Status.CANCELLED or a.starts_at < now],
+        key=lambda a: a.starts_at,
+        reverse=True,
+    )
+
+    return render(request, "appointments/my_appointments.html", {
+        "tab": "past" if tab == "past" else "upcoming",
+        "upcoming": upcoming,
+        "past": past,
+    })
+
+
+@require_POST
+@role_required(User.Role.PATIENT)
+def cancel_appointment(request, pk):
+    # only the patient who owns it can cancel it
+    appointment = get_object_or_404(Appointment, pk=pk, patient=request.user)
+
+    if appointment.can_cancel:
+        appointment.status = Appointment.Status.CANCELLED
+        appointment.save(update_fields=["status"])
+        messages.success(request, "Your appointment has been cancelled.")
+    else:
+        messages.error(
+            request,
+            "This appointment can no longer be cancelled. Cancellation closes "
+            f"{Appointment.CANCEL_BEFORE_HOURS} hours before the visit.",
+        )
+    return redirect("my_appointments")

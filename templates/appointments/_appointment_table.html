@@ -1,0 +1,37 @@
+{% if items %}
+  <table>
+    <thead>
+      <tr>
+        <th>Doctor</th><th>Date</th><th>Time</th><th>Status</th><th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for a in items %}
+        <tr>
+          <td>
+            Dr. {{ a.doctor.user.get_full_name|default:a.doctor.user.username }}<br>
+            <span class="muted">{{ a.doctor.specialization }}</span>
+          </td>
+          <td>{{ a.date|date:"d M Y" }}</td>
+          <td>{{ a.time|time:"H:i" }}</td>
+          <td><span class="badge badge-{{ a.status }}">{{ a.get_status_display }}</span></td>
+          <td>
+            {% if a.can_cancel %}
+              <form method="post" action="{% url 'cancel_appointment' a.pk %}"
+                    onsubmit="return confirm('Cancel this appointment?');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger btn-small">Cancel</button>
+              </form>
+            {% elif a.doctor_notes %}
+              <span class="muted">Note: {{ a.doctor_notes }}</span>
+            {% else %}
+              <span class="muted">-</span>
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <p>{{ empty_text }}</p>
+{% endif %}

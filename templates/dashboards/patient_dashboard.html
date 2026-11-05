@@ -15,15 +15,20 @@
       <tbody>
         {% for a in appointments %}
           <tr>
-            <td>{{ a.doctor }}</td>
-            <td>{{ a.date }}</td>
+            <td>Dr. {{ a.doctor.user.get_full_name|default:a.doctor.user.username }}</td>
+            <td>{{ a.date|date:"d M Y" }}</td>
             <td>{{ a.time|time:"H:i" }}</td>
-            <td>{{ a.get_status_display }}</td>
+            <td><span class="badge badge-{{ a.status }}">{{ a.get_status_display }}</span></td>
           </tr>
         {% endfor %}
       </tbody>
     </table>
   {% else %}
-   <p>You have no appointments yet. <a href="{% url 'doctor_list' %}">Find a doctor and book one</a>.</p>
+    <p>You have no appointments yet. <a href="{% url 'doctor_list' %}">Find a doctor and book one</a>.</p>
   {% endif %}
+
+  <p>
+    <a href="{% url 'my_appointments' %}" class="btn">Manage all appointments</a>
+    <a href="{% url 'doctor_list' %}" class="btn btn-outline">Book new</a>
+  </p>
 {% endblock %}

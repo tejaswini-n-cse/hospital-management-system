@@ -16,6 +16,9 @@
       <a href="{% url 'doctor_list' %}">Doctors</a>
       {% if user.is_authenticated %}
         <a href="{% url 'dashboard' %}">Dashboard</a>
+        {% if user.role == 'patient' %}
+          <a href="{% url 'my_appointments' %}">My appointments</a>
+        {% endif %}
         <span class="hello">Hi, {{ user.first_name|default:user.username }}</span>
         <form method="post" action="{% url 'logout' %}" class="inline-form">
           {% csrf_token %}
