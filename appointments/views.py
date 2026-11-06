@@ -1,3 +1,4 @@
+from django.utils.http import url_has_allowed_host_and_scheme
 from billing.services import create_invoice_for
 from datetime import date, timedelta
 
@@ -185,6 +186,14 @@ def cancel_appointment(request, pk):
 def _doctor_profile_or_404(user):
     return get_object_or_404(DoctorProfile, user=user)
 
+def _safe_next(request, default="doctor_appointments"):
+    target = request.POST.get("next", "")
+    if target and url_has_allowed_host_and_scheme(
+        target, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+    ):
+        return target
+    return default
+
 
 @role_required(User.Role.DOCTOR)
 def doctor_appointments(request):
@@ -238,7 +247,7 @@ def update_appointment_status(request, pk):
     # only this doctor's own appointments can be changed
     appointment = get_object_or_404(Appointment, pk=pk, doctor=profile)
     action = request.POST.get("action")
-    redirect_to = request.POST.get("next") or "doctor_appointments"
+    redirect_to = _safe_next(request)
 
     if action == "confirm" and appointment.can_confirm:
         new_status, text = Appointment.Status.CONFIRMED, "Appointment confirmed."
@@ -269,7 +278,7 @@ def save_doctor_notes(request, pk):
     appointment.doctor_notes = request.POST.get("doctor_notes", "").strip()[:2000]
     appointment.save(update_fields=["doctor_notes"])
     messages.success(request, "Notes saved.")
-    return redirect(request.POST.get("next") or "doctor_appointments")
+    return redirect(_safe_next(request))
 
 
 @role_required(User.Role.DOCTOR)
