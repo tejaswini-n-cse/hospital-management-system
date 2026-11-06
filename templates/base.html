@@ -9,9 +9,10 @@
 </head>
 <body>
 
-  <header class="navbar">
+  <header class="navbar no-print">
     <a href="{% url 'home' %}" class="brand">🏥 Hospital Management</a>
-    <nav>
+    <button type="button" class="nav-toggle" id="nav-toggle" aria-label="Toggle menu">&#9776;</button>
+    <nav id="main-nav">
       <a href="{% url 'home' %}">Home</a>
       <a href="{% url 'doctor_list' %}">Doctors</a>
       {% if user.is_authenticated %}
@@ -48,8 +49,9 @@
   </main>
 
   <footer class="footer">
-    <p>&copy; 2026 Hospital Management System</p>
+    <p>&copy; 2026 Hospital Management System | Built with Django &amp; MySQL</p>
   </footer>
 
+  <script src="{% static 'js/nav.js' %}"></script>
 </body>
 </html>

@@ -4,14 +4,37 @@
 
 {% block content %}
   <h1>Welcome, Dr. {{ user.get_full_name|default:user.username }}</h1>
-  <p>Role: Doctor</p>
 
   {% if not profile %}
     <div class="message warning">
       Your doctor profile is not set up yet. Ask the admin to create it.
     </div>
   {% else %}
-    <p>{{ profile.specialization }} | {{ profile.department }}</p>
+    <p class="muted">{{ profile.specialization }} | {{ profile.department }}</p>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="num-big">{{ today_count }}</div>
+        <div class="label">Visits today</div>
+      </div>
+      <div class="stat warn">
+        <div class="num-big">{{ pending_count }}</div>
+        <div class="label">Awaiting confirmation</div>
+      </div>
+      <div class="stat good">
+        <div class="num-big">{{ completed_count }}</div>
+        <div class="label">Completed visits</div>
+      </div>
+      <div class="stat good">
+        <div class="num-big">₹{{ earned }}</div>
+        <div class="label">Collected earnings</div>
+      </div>
+    </div>
+
+    <div class="quick-links">
+      <a href="{% url 'doctor_appointments' %}" class="btn">Manage my schedule</a>
+      <a href="{% url 'doctor_invoices' %}" class="btn btn-outline">Earnings</a>
+    </div>
 
     <h2>Latest appointments</h2>
     {% if appointments %}
@@ -33,7 +56,5 @@
     {% else %}
       <p>No appointments yet.</p>
     {% endif %}
-
-    <p><a href="{% url 'doctor_appointments' %}" class="btn">Manage my schedule</a></p>
   {% endif %}
 {% endblock %}

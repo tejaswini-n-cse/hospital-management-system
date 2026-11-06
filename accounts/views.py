@@ -9,6 +9,11 @@ from django.shortcuts import redirect, render
 from .forms import PatientRegistrationForm
 from .models import Department, DoctorProfile, User
 
+from decimal import Decimal
+
+from django.db.models import Sum
+from django.utils import timezone
+
 
 def role_required(role):
     """Allow a view only for users with the given role."""
@@ -62,19 +67,52 @@ def dashboard(request):
 
 @role_required(User.Role.PATIENT)
 def patient_dashboard(request):
-    appointments = request.user.appointments.select_related("doctor__user")[:5]
+    from appointments.models import Appointment, MedicalRecord
+    from billing.models import Invoice
+
+    now = timezone.now()
+    all_appts = list(request.user.appointments.select_related("doctor__user"))
+
+    active = (Appointment.Status.PENDING, Appointment.Status.CONFIRMED)
+    upcoming_count = sum(1 for a in all_appts if a.status in active and a.starts_at >= now)
+
+    unpaid = Invoice.objects.filter(
+        appointment__patient=request.user, status=Invoice.Status.UNPAID
+    ).aggregate(total=Sum("total"))["total"] or Decimal("0.00")
+
+    records_count = MedicalRecord.objects.filter(appointment__patient=request.user).count()
+
+    recent = sorted(all_appts, key=lambda a: a.starts_at, reverse=True)[:5]
+
     return render(request, "dashboards/patient_dashboard.html", {
-        "appointments": appointments,
+        "appointments": recent,
+        "upcoming_count": upcoming_count,
+        "unpaid_total": unpaid,
+        "records_count": records_count,
     })
 
 
 @role_required(User.Role.DOCTOR)
 def doctor_dashboard(request):
+    from appointments.models import Appointment
+    from billing.models import Invoice
+
     profile = DoctorProfile.objects.filter(user=request.user).first()
-    appointments = []
+    context = {"profile": profile, "appointments": []}
+
     if profile:
-        appointments = profile.appointments.select_related("patient")[:10]
-    return render(request, "dashboards/doctor_dashboard.html", {
-        "profile": profile,
-        "appointments": appointments,
-    })
+        today = timezone.localdate()
+        appts = profile.appointments.select_related("patient")
+
+        context.update({
+            "appointments": appts.order_by("-date", "-time")[:8],
+            "today_count": appts.filter(date=today).exclude(
+                status=Appointment.Status.CANCELLED).count(),
+            "pending_count": appts.filter(status=Appointment.Status.PENDING).count(),
+            "completed_count": appts.filter(status=Appointment.Status.COMPLETED).count(),
+            "earned": Invoice.objects.filter(
+                appointment__doctor=profile, status=Invoice.Status.PAID
+            ).aggregate(total=Sum("total"))["total"] or Decimal("0.00"),
+        })
+
+    return render(request, "dashboards/doctor_dashboard.html", context)

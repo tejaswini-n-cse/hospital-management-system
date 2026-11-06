@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}Access denied{% endblock %}
+
+{% block content %}
+  <div class="error-page">
+    <div class="code">403</div>
+    <h1>Access denied</h1>
+    <p class="muted">You do not have permission to view this page.</p>
+    <a href="{% url 'home' %}" class="btn">Back to home</a>
+  </div>
+{% endblock %}

@@ -4,9 +4,31 @@
 
 {% block content %}
   <h1>Welcome, {{ user.get_full_name|default:user.username }}</h1>
-  <p>Role: Patient</p>
+  <p class="muted">Patient dashboard</p>
 
-  <h2>My recent appointments</h2>
+  <div class="stats">
+    <div class="stat">
+      <div class="num-big">{{ upcoming_count }}</div>
+      <div class="label">Upcoming appointments</div>
+    </div>
+    <div class="stat warn">
+      <div class="num-big">₹{{ unpaid_total }}</div>
+      <div class="label">Outstanding invoices</div>
+    </div>
+    <div class="stat good">
+      <div class="num-big">{{ records_count }}</div>
+      <div class="label">Medical records</div>
+    </div>
+  </div>
+
+  <div class="quick-links">
+    <a href="{% url 'doctor_list' %}" class="btn">Book appointment</a>
+    <a href="{% url 'my_appointments' %}" class="btn btn-outline">My appointments</a>
+    <a href="{% url 'invoice_list' %}" class="btn btn-outline">Invoices</a>
+    <a href="{% url 'my_records' %}" class="btn btn-outline">Records</a>
+  </div>
+
+  <h2>Recent appointments</h2>
   {% if appointments %}
     <table>
       <thead>
@@ -26,9 +48,4 @@
   {% else %}
     <p>You have no appointments yet. <a href="{% url 'doctor_list' %}">Find a doctor and book one</a>.</p>
   {% endif %}
-
-  <p>
-    <a href="{% url 'my_appointments' %}" class="btn">Manage all appointments</a>
-    <a href="{% url 'doctor_list' %}" class="btn btn-outline">Book new</a>
-  </p>
 {% endblock %}
