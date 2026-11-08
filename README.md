@@ -2,6 +2,14 @@
 
 A full stack web application where patients book doctor appointments and doctors manage visits, medical records, prescriptions and billing. Built with **Django, MySQL, HTML, CSS and JavaScript**, with role-based access and a transaction-safe booking engine.
 
+## Demo
+
+
+
+https://github.com/user-attachments/assets/dbab1da4-2c06-47d6-81ba-e04fbeb7c5b7
+
+
+
 ![Python](https://img.shields.io/badge/Python-3.12-blue)
 ![Django](https://img.shields.io/badge/Django-5.2-green)
 ![MySQL](https://img.shields.io/badge/MySQL-8-orange)
