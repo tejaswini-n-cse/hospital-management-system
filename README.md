@@ -62,7 +62,7 @@ A full stack web application where patients book doctor appointments and doctors
 
 ### Dashboard and admin
 
-| Dashboard | Admin panel |
+| Dashboard | 
 |---|---|
 | ![Dashboard](docs/screenshots/patient-dashboard.png) | 
 ## Tech Stack
